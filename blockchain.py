@@ -4,6 +4,7 @@ import hashlib as hl
 import json
 import pickle
 import requests
+import time
 
 # Import two functions from our hash_util.py file. Omit the ".py" in the import
 from utility.hash_util import hash_block
@@ -31,7 +32,7 @@ class Blockchain:
     def __init__(self, public_key, node_id):
         """The constructor of the Blockchain class."""
         # Our starting block for the blockchain
-        genesis_block = Block(0, '', [], 100, 0)
+        genesis_block = Block(0, '', [], 86400, 1577836799)
         # Initializing our (empty) blockchain list
         self.chain = [genesis_block]
         # Unhandled transactions
@@ -73,6 +74,7 @@ class Blockchain:
                     converted_tx = [Transaction(
                         tx['sender'],
                         tx['recipient'],
+                        tx['zero'],         #added to hold zero day countdown
                         tx['signature'],
                         tx['amount']) for tx in block['transactions']]
                     updated_block = Block(
@@ -91,6 +93,7 @@ class Blockchain:
                     updated_transaction = Transaction(
                         tx['sender'],
                         tx['recipient'],
+                        tx['zero'],
                         tx['signature'],
                         tx['amount'])
                     updated_transactions.append(updated_transaction)
@@ -205,6 +208,7 @@ class Blockchain:
     def add_transaction(self,
                         recipient,
                         sender,
+                        zero,
                         signature,
                         amount=1.0,
                         is_receiving=False):
@@ -223,7 +227,7 @@ class Blockchain:
         # }
         # if self.public_key == None:
         #     return False
-        transaction = Transaction(sender, recipient, signature, amount)
+        transaction = Transaction(sender, recipient, zero, signature, amount)
         if Verification.verify_transaction(transaction, self.get_balance):
             self.__open_transactions.append(transaction)
             self.save_data()
@@ -235,6 +239,7 @@ class Blockchain:
                                                  json={
                                                      'sender': sender,
                                                      'recipient': recipient,
+                                                     'zero': zero,
                                                      'amount': amount,
                                                      'signature': signature
                                                  })
@@ -247,6 +252,14 @@ class Blockchain:
             return True
         return False
 
+    def transaction_zero(self):
+        """Countdown to day zero,the  amount of days left until voting ends."""
+        genesis_bloc = self.__chain[0]
+        genesis_ts = genesis_bloc.timestamp
+        genesis_pf = genesis_bloc.proof
+        transaction_zero = (genesis_ts - time.time()) // genesis_pf
+        return transaction_zero
+
     def mine_block(self):
         """Create a new block and add open transactions to it."""
         # Fetch the currently last block of the blockchain
@@ -257,6 +270,12 @@ class Blockchain:
         # value)
         hashed_block = hash_block(last_block)
         proof = self.proof_of_work()
+        # Added to avoid blockchain startup error after genesis bloxk as it contains no transaction i.e. no zero
+        last_pf = last_block.proof
+        if last_pf != 86400:
+            zero = self.transaction_zero()           
+        else:
+            zero = 365.0
         # Miners should be rewarded, so let's create a reward transaction
         # reward_transaction = {
         #     'sender': 'MINING',
@@ -264,7 +283,7 @@ class Blockchain:
         #     'amount': MINING_REWARD
         # }
         reward_transaction = Transaction(
-            'MINING', self.public_key, '', MINING_REWARD)
+            'MINING', self.public_key, zero, '', MINING_REWARD)
         # Copy transaction instead of manipulating the original
         # open_transactions list
         # This ensures that if for some reason the mining should fail,
@@ -301,6 +320,7 @@ class Blockchain:
         transactions = [Transaction(
             tx['sender'],
             tx['recipient'],
+            tx['zero'],
             tx['signature'],
             tx['amount']) for tx in block['transactions']]
         # Validate the proof of work of the block and store the result (True
@@ -329,6 +349,7 @@ class Blockchain:
             for opentx in stored_transactions:
                 if (opentx.sender == itx['sender'] and
                         opentx.recipient == itx['recipient'] and
+                        opentx.zero == itx['zero'] and
                         opentx.amount == itx['amount'] and
                         opentx.signature == itx['signature']):
                     try:
@@ -360,6 +381,7 @@ class Blockchain:
                         Transaction(
                             tx['sender'],
                             tx['recipient'],
+                            tx['zero'],
                             tx['signature'],
                             tx['amount']) for tx in block['transactions']
                     ],
