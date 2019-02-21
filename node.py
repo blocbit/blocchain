@@ -72,8 +72,8 @@ def get_balance():
         return jsonify(response), 500
 
 
-@app.route('/broadcast-transaction', methods=['POST'])
-def broadcast_transaction():
+@app.route('/broadcast-submission', methods=['POST'])
+def broadcast_submission():
     values = request.get_json()
     if not values:
         response = {'message': 'No data found.'}
@@ -82,7 +82,7 @@ def broadcast_transaction():
     if not all(key in values for key in required):
         response = {'message': 'Some data is missing.'}
         return jsonify(response), 400
-    success = blockchain.add_transaction(
+    success = blockchain.add_submission(
         values['recipient'],
         values['sender'],
         values['zero'],
@@ -91,8 +91,8 @@ def broadcast_transaction():
         is_receiving=True)
     if success:
         response = {
-            'message': 'Successfully added transaction.',
-            'transaction': {
+            'message': 'Successfully added submission.',
+            'submission': {
                 'sender': values['sender'],
                 'recipient': values['recipient'],
                 'zero': values['zero'],
@@ -103,7 +103,7 @@ def broadcast_transaction():
         return jsonify(response), 201
     else:
         response = {
-            'message': 'Creating a transaction failed.'
+            'message': 'Creating a submission failed.'
         }
         return jsonify(response), 500
 
@@ -136,8 +136,8 @@ def broadcast_block():
         return jsonify(response), 409
 
 
-@app.route('/transaction', methods=['POST'])
-def add_transaction():
+@app.route('/submission', methods=['POST'])
+def add_submission():
     if wallet.public_key is None:
         response = {
             'message': 'No wallet set up.'
@@ -157,14 +157,14 @@ def add_transaction():
         return jsonify(response), 400
     recipient = values['recipient']
     amount = values['amount']
-    zero = blockchain.transaction_zero()
-    signature = wallet.sign_transaction(wallet.public_key, recipient, zero, amount)
-    success = blockchain.add_transaction(
+    zero = blockchain.submission_zero()
+    signature = wallet.sign_submission(wallet.public_key, recipient, zero, amount)
+    success = blockchain.add_submission(
         recipient, wallet.public_key, zero, signature, amount)
     if success:
         response = {
-            'message': 'Successfully added transaction.',
-            'transaction': {
+            'message': 'Successfully added submission.',
+            'submission': {
                 'sender': wallet.public_key,
                 'recipient': recipient,
                 'zero': zero,
@@ -176,7 +176,7 @@ def add_transaction():
         return jsonify(response), 201
     else:
         response = {
-            'message': 'Creating a transaction failed.'
+            'message': 'Creating a submission failed.'
         }
         return jsonify(response), 500
 
@@ -189,8 +189,8 @@ def mine():
     block = blockchain.mine_block()
     if block is not None:
         dict_block = block.__dict__.copy()
-        dict_block['transactions'] = [
-            tx.__dict__ for tx in dict_block['transactions']]
+        dict_block['submissions'] = [
+            tx.__dict__ for tx in dict_block['submissions']]
         response = {
             'message': 'Block added successfully.',
             'block': dict_block,
@@ -215,11 +215,11 @@ def resolve_conflicts():
     return jsonify(response), 200
 
 
-@app.route('/transactions', methods=['GET'])
-def get_open_transaction():
-    transactions = blockchain.get_open_transactions()
-    dict_transactions = [tx.__dict__ for tx in transactions]
-    return jsonify(dict_transactions), 200
+@app.route('/submissions', methods=['GET'])
+def get_open_submission():
+    submissions = blockchain.get_open_submissions()
+    dict_submissions = [tx.__dict__ for tx in submissions]
+    return jsonify(dict_submissions), 200
 
 
 @app.route('/chain', methods=['GET'])
@@ -227,8 +227,8 @@ def get_chain():
     chain_snapshot = blockchain.chain
     dict_chain = [block.__dict__.copy() for block in chain_snapshot]
     for dict_block in dict_chain:
-        dict_block['transactions'] = [
-            tx.__dict__ for tx in dict_block['transactions']]
+        dict_block['submissions'] = [
+            tx.__dict__ for tx in dict_block['submissions']]
     return jsonify(dict_chain), 200
 
 

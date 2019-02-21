@@ -137,14 +137,14 @@
                             <a class="nav-link" :class="{active: view === 'chain'}" href="#" @click="view = 'chain'">Blockchain</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" :class="{active: view === 'tx'}" href="#" @click="view = 'tx'">Open Transactions</a>
+                            <a class="nav-link" :class="{active: view === 'tx'}" href="#" @click="view = 'tx'">Open Submissions</a>
                         </li>
                     </ul>
                 </div>
             </div>
             <div class="row my-3">
                 <div class="col">
-                    <button class="btn btn-primary" @click="onLoadData">{{ view === 'chain' ? 'Load Blockchain' : 'Load Transactions' }}</button>
+                    <button class="btn btn-primary" @click="onLoadData">{{ view === 'chain' ? 'Load Blockchain' : 'Load Submissions' }}</button>
                     <button v-if="view === 'chain' && wallet" class="btn btn-success" @click="onMine">Mine Coins</button>
                     <button class="btn btn-warning" @click="onResolve">Resolve Conflicts</button>
                 </div>
@@ -170,7 +170,7 @@
                                 <div class="card-body">
                                     <p>Previous Hash: {{ data.previous_hash }}</p>
                                     <div class="list-group">
-                                        <div v-for="tx in data.transactions" class="list-group-item flex-column align-items-start">
+                                        <div v-for="tx in data.submissions" class="list-group-item flex-column align-items-start">
                                             <div>Sender: {{ tx.sender }}</div>
                                             <div>Recipient: {{ tx.recipient }}</div>
                                             <div>Amount: {{ tx.amount }}</div>
@@ -182,7 +182,7 @@
                             <div v-if="view === 'tx'" class="card-header">
                                 <h5 class="mb-0">
                                     <button class="btn btn-link" type="button" @click="showElement === index ? showElement = null : showElement = index">
-                                        Transaction #{{ index }}
+                                        Submission #{{ index }}
                                     </button>
                                 </h5>
                             </div>
@@ -211,7 +211,7 @@
             el: '#app',
             data: {
                 blockchain: [],
-                openTransactions: [],
+                openSubmissions: [],
                 wallet: null,
                 view: 'chain',
                 walletLoading: false,
@@ -231,7 +231,7 @@
                     if (this.view === 'chain') {
                         return this.blockchain;
                     } else {
-                        return this.openTransactions;
+                        return this.openSubmissions;
                     }
                 }
             },
@@ -281,10 +281,10 @@
                         });
                 },
                 onSendTx: function () {
-                    // Send Transaction to backend
+                    // Send submission to backend
                     this.txLoading = true;
                     var vm = this;
-                    axios.post('/transaction', {
+                    axios.post('/submission', {
                         recipient: this.outgoingTx.recipient,
                         amount: this.outgoingTx.amount
                     })
@@ -342,11 +342,11 @@
                                 vm.error = 'Something went wrong.'
                             });
                     } else {
-                        // Load transaction data
+                        // Load submission data
                         var vm = this
-                        axios.get('/transactions')
+                        axios.get('/submissions')
                             .then(function (response) {
-                                vm.openTransactions = response.data
+                                vm.openSubmissions = response.data
                                 vm.dataLoading = false
                             })
                             .catch(function (error) {

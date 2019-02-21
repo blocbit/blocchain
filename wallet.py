@@ -6,7 +6,7 @@ import binascii
 
 
 class Wallet:
-    """Creates, loads and holds private and public keys. Manages transaction
+    """Creates, loads and holds private and public keys. Manages submission
     signing and verification."""
 
     def __init__(self, node_id):
@@ -60,13 +60,13 @@ class Wallet:
             .decode('ascii')
         )
 
-    def sign_transaction(self, sender, recipient, zero, amount):
-        """Sign a transaction and return the signature.
+    def sign_submission(self, sender, recipient, zero, amount):
+        """Sign a submission and return the signature.
 
         Arguments:
-            :sender: The sender of the transaction.
-            :recipient: The recipient of the transaction.
-            :amount: The amount of the transaction.
+            :sender: The sender of the submission.
+            :recipient: The recipient of the submission.
+            :amount: The amount of the submission.
         """
         signer = PKCS1_v1_5.new(RSA.importKey(
             binascii.unhexlify(self.private_key)))
@@ -76,14 +76,14 @@ class Wallet:
         return binascii.hexlify(signature).decode('ascii')
 
     @staticmethod
-    def verify_transaction(transaction):
-        """Verify the signature of a transaction.
+    def verify_submission(submission):
+        """Verify the signature of a submission.
 
         Arguments:
-            :transaction: The transaction that should be verified.
+            :submission: The submission that should be verified.
         """
-        public_key = RSA.importKey(binascii.unhexlify(transaction.sender))
+        public_key = RSA.importKey(binascii.unhexlify(submission.sender))
         verifier = PKCS1_v1_5.new(public_key)
-        h = SHA256.new((str(transaction.sender) + str(transaction.recipient) + str(transaction.zero) +
-                        str(transaction.amount)).encode('utf8'))
-        return verifier.verify(h, binascii.unhexlify(transaction.signature))
+        h = SHA256.new((str(submission.sender) + str(submission.recipient) + str(submission.zero) +
+                        str(submission.amount)).encode('utf8'))
+        return verifier.verify(h, binascii.unhexlify(submission.signature))
