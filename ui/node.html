@@ -144,7 +144,7 @@
             </div>
             <div class="row my-3">
                 <div class="col">
-                    <button class="btn btn-primary" @click="onLoadData">{{ view === 'chain' ? 'Load Blockchain' : 'Load Submissions' }}</button>
+                    <button class="btn btn-primary" @click="onLoadData">{{ view === 'chain' ? 'Load Blocchain' : 'Load Submissions' }}</button>
                     <button v-if="view === 'chain' && ballot" class="btn btn-success" @click="onMine">Cast Votes</button>
                     <button class="btn btn-warning" @click="onResolve">Resolve Conflicts</button>
                 </div>
@@ -173,7 +173,7 @@
                                         <div v-for="tx in data.submissions" class="list-group-item flex-column align-items-start">
                                             <div>Voter: {{ tx.voter }}</div>
                                             <div>Candidate: {{ tx.candidate }}</div>
-                                            <div>Vote: {{ tx.amount }}</div>
+                                            <div>Votes: {{ tx.amount }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -192,7 +192,7 @@
                                         <div class="list-group-item flex-column align-items-start">
                                             <div>Voter: {{ data.voter }}</div>
                                             <div>Candidate: {{ data.candidate }}</div>
-                                            <div>Vote: {{ data.amount }}</div>
+                                            <div>Votes: {{ data.amount }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -210,7 +210,7 @@
         new Vue({
             el: '#app',
             data: {
-                blockchain: [],
+                blocchain: [],
                 openSubmissions: [],
                 ballot: null,
                 view: 'chain',
@@ -229,7 +229,7 @@
             computed: {
                 loadedData: function () {
                     if (this.view === 'chain') {
-                        return this.blockchain;
+                        return this.blocchain;
                     } else {
                         return this.openSubmissions;
                     }
@@ -329,12 +329,12 @@
                 },
                 onLoadData: function () {
                     if (this.view === 'chain') {
-                        // Load blockchain data
+                        // Load blocchain data
                         var vm = this
                         this.dataLoading = true
                         axios.get('/chain')
                             .then(function (response) {
-                                vm.blockchain = response.data
+                                vm.blocchain = response.data
                                 vm.dataLoading = false
                             })
                             .catch(function (error) {

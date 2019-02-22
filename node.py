@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 from ballot import Ballot
-from blockchain import Blockchain
+from blocchain import Blocchain
 
 app = Flask(__name__)
 CORS(app)
@@ -22,12 +22,12 @@ def get_network_ui():
 def create_keys():
     ballot.create_keys()
     if ballot.save_keys():
-        global blockchain
-        blockchain = Blockchain(ballot.public_key, port)
+        global blocchain
+        blocchain = Blocchain(ballot.public_key, port)
         response = {
             'public_key': ballot.public_key,
             'private_key': ballot.private_key,
-            'funds': blockchain.get_balance()
+            'funds': blocchain.get_balance()
         }
         return jsonify(response), 201
     else:
@@ -40,12 +40,12 @@ def create_keys():
 @app.route('/ballot', methods=['GET'])
 def load_keys():
     if ballot.load_keys():
-        global blockchain
-        blockchain = Blockchain(ballot.public_key, port)
+        global blocchain
+        blocchain = Blocchain(ballot.public_key, port)
         response = {
             'public_key': ballot.public_key,
             'private_key': ballot.private_key,
-            'funds': blockchain.get_balance()
+            'funds': blocchain.get_balance()
         }
         return jsonify(response), 201
     else:
@@ -57,7 +57,7 @@ def load_keys():
 
 @app.route('/balance', methods=['GET'])
 def get_balance():
-    balance = blockchain.get_balance()
+    balance = blocchain.get_balance()
     if balance is not None:
         response = {
             'message': 'Fetched balance successfully.',
@@ -82,7 +82,7 @@ def broadcast_submission():
     if not all(key in values for key in required):
         response = {'message': 'Some data is missing.'}
         return jsonify(response), 400
-    success = blockchain.add_submission(
+    success = blocchain.add_submission(
         values['candidate'],
         values['voter'],
         values['zero'],
@@ -108,31 +108,31 @@ def broadcast_submission():
         return jsonify(response), 500
 
 
-@app.route('/broadcast-block', methods=['POST'])
-def broadcast_block():
+@app.route('/broadcast-bloc', methods=['POST'])
+def broadcast_bloc():
     values = request.get_json()
     if not values:
         response = {'message': 'No data found.'}
         return jsonify(response), 400
-    if 'block' not in values:
+    if 'bloc' not in values:
         response = {'message': 'Some data is missing.'}
         return jsonify(response), 400
-    block = values['block']
-    if block['index'] == blockchain.chain[-1].index + 1:
-        if blockchain.add_block(block):
-            response = {'message': 'Block added'}
+    bloc = values['bloc']
+    if bloc['index'] == blocchain.chain[-1].index + 1:
+        if blocchain.add_bloc(bloc):
+            response = {'message': 'Bloc added'}
             return jsonify(response), 201
         else:
-            response = {'message': 'Block seems invalid.'}
+            response = {'message': 'Bloc seems invalid.'}
             return jsonify(response), 409
-    elif block['index'] > blockchain.chain[-1].index:
+    elif bloc['index'] > blocchain.chain[-1].index:
         response = {
-            'message': 'Blockchain seems to differ from local blockchain.'}
-        blockchain.resolve_conflicts = True
+            'message': 'Blocchain seems to differ from local blocchain.'}
+        blocchain.resolve_conflicts = True
         return jsonify(response), 200
     else:
         response = {
-            'message': 'Blockchain seems to be shorter, block not added'}
+            'message': 'Blocchain seems to be shorter, bloc not added'}
         return jsonify(response), 409
 
 
@@ -157,9 +157,9 @@ def add_submission():
         return jsonify(response), 400
     candidate = values['candidate']
     amount = values['amount']
-    zero = blockchain.submission_zero()
+    zero = blocchain.submission_zero()
     signature = ballot.sign_submission(ballot.public_key, candidate, zero, amount)
-    success = blockchain.add_submission(
+    success = blocchain.add_submission(
         candidate, ballot.public_key, zero, signature, amount)
     if success:
         response = {
@@ -171,7 +171,7 @@ def add_submission():
                 'amount': amount,
                 'signature': signature
             },
-            'funds': blockchain.get_balance()
+            'funds': blocchain.get_balance()
         }
         return jsonify(response), 201
     else:
@@ -183,23 +183,23 @@ def add_submission():
 
 @app.route('/mine', methods=['POST'])
 def mine():
-    if blockchain.resolve_conflicts:
-        response = {'message': 'Resolve conflicts first, block not added!'}
+    if blocchain.resolve_conflicts:
+        response = {'message': 'Resolve conflicts first, bloc not added!'}
         return jsonify(response), 409
-    block = blockchain.mine_block()
-    if block is not None:
-        dict_block = block.__dict__.copy()
-        dict_block['submissions'] = [
-            tx.__dict__ for tx in dict_block['submissions']]
+    bloc = blocchain.mine_bloc()
+    if bloc is not None:
+        dict_bloc = bloc.__dict__.copy()
+        dict_bloc['submissions'] = [
+            tx.__dict__ for tx in dict_bloc['submissions']]
         response = {
-            'message': 'Block added successfully.',
-            'block': dict_block,
-            'funds': blockchain.get_balance()
+            'message': 'Bloc added successfully.',
+            'bloc': dict_bloc,
+            'funds': blocchain.get_balance()
         }
         return jsonify(response), 201
     else:
         response = {
-            'message': 'Adding a block failed.',
+            'message': 'Adding a bloc failed.',
             'ballot_set_up': ballot.public_key is not None
         }
         return jsonify(response), 500
@@ -207,7 +207,7 @@ def mine():
 
 @app.route('/resolve-conflicts', methods=['POST'])
 def resolve_conflicts():
-    replaced = blockchain.resolve()
+    replaced = blocchain.resolve()
     if replaced:
         response = {'message': 'Chain was replaced!'}
     else:
@@ -217,18 +217,18 @@ def resolve_conflicts():
 
 @app.route('/submissions', methods=['GET'])
 def get_open_submission():
-    submissions = blockchain.get_open_submissions()
+    submissions = blocchain.get_open_submissions()
     dict_submissions = [tx.__dict__ for tx in submissions]
     return jsonify(dict_submissions), 200
 
 
 @app.route('/chain', methods=['GET'])
 def get_chain():
-    chain_snapshot = blockchain.chain
-    dict_chain = [block.__dict__.copy() for block in chain_snapshot]
-    for dict_block in dict_chain:
-        dict_block['submissions'] = [
-            tx.__dict__ for tx in dict_block['submissions']]
+    chain_snapshot = blocchain.chain
+    dict_chain = [bloc.__dict__.copy() for bloc in chain_snapshot]
+    for dict_bloc in dict_chain:
+        dict_bloc['submissions'] = [
+            tx.__dict__ for tx in dict_bloc['submissions']]
     return jsonify(dict_chain), 200
 
 
@@ -246,10 +246,10 @@ def add_node():
         }
         return jsonify(response), 400
     node = values['node']
-    blockchain.add_peer_node(node)
+    blocchain.add_peer_node(node)
     response = {
         'message': 'Node added successfully.',
-        'all_nodes': blockchain.get_peer_nodes()
+        'all_nodes': blocchain.get_peer_nodes()
     }
     return jsonify(response), 201
 
@@ -261,17 +261,17 @@ def remove_node(node_url):
             'message': 'No node found.'
         }
         return jsonify(response), 400
-    blockchain.remove_peer_node(node_url)
+    blocchain.remove_peer_node(node_url)
     response = {
         'message': 'Node removed',
-        'all_nodes': blockchain.get_peer_nodes()
+        'all_nodes': blocchain.get_peer_nodes()
     }
     return jsonify(response), 200
 
 
 @app.route('/nodes', methods=['GET'])
 def get_nodes():
-    nodes = blockchain.get_peer_nodes()
+    nodes = blocchain.get_peer_nodes()
     response = {
         'all_nodes': nodes
     }
@@ -285,5 +285,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
     ballot = Ballot(port)
-    blockchain = Blockchain(ballot.public_key, port)
+    blocchain = Blocchain(ballot.public_key, port)
     app.run(host='0.0.0.0', port=port)

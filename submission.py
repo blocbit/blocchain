@@ -4,13 +4,13 @@ from utility.printable import Printable
 
 
 class Submission(Printable):
-    """A submission which can be added to a block in the blockchain.
+    """A submission which can be added to a bloc in the blocchain.
 
     Attributes:
         :voter: The person voting.
         :candidate: The candidate recieving the votes.
         :signature: The signature for the submission.
-        :amount: The amount of coins sent.
+        :amount: The amount of votes sent.
     """
 
     def __init__(self, voter, candidate, zero, signature, amount):

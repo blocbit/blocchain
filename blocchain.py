@@ -2,39 +2,39 @@ from functools import reduce
 import hashlib as hl
 
 import json
-import pickle
+#import pickle
 import requests
 import time
 
 # Import two functions from our hash_util.py file. Omit the ".py" in the import
-from utility.hash_util import hash_block
+from utility.hash_util import hash_bloc
 from utility.verification import Verification
-from block import Block
+from bloc import Bloc
 from submission import Submission
 from ballot import Ballot
 
-# The reward we give to miners (for creating a new block)
-WIN_VOTE = 10
+# The reward we give to miners (for creating a new bloc)
+VOTE_WINDOW = True
 
 print(__name__)
 
 
-class Blockchain:
-    """The Blockchain class manages the chain of blocks as well as open
+class Blocchain:
+    """The Blocchain class manages the chain of blocs as well as open
     submissions and the node on which it's running.
 
     Attributes:
-        :chain: The list of blocks
+        :chain: The list of blocs
         :open_submissions (private): The list of open submissions
-        :hosting_node: The connected node (which runs the blockchain).
+        :hosting_node: The connected node (which runs the blocchain).
     """
 
     def __init__(self, public_key, node_id):
-        """The constructor of the Blockchain class."""
-        # Our starting block for the blockchain
-        genesis_block = Block(0, '', [], 86400, 1577836799)
-        # Initializing our (empty) blockchain list
-        self.chain = [genesis_block]
+        """The constructor of the Blocchain class."""
+        # Our starting bloc for the blocchain
+        genesis_bloc = Bloc(0, '', [], 86400, 1577836799)
+        # Initializing our (empty) blocchain list
+        self.chain = [genesis_bloc]
         # Unhandled submissions
         self.__open_submissions = []
         self.public_key = public_key
@@ -59,32 +59,32 @@ class Blockchain:
         return self.__open_submissions[:]
 
     def load_data(self):
-        """Initialize blockchain + open submissions data from a file."""
+        """Initialize blocchain + open submissions data from a file."""
         try:
-            with open('blockchain-{}.txt'.format(self.node_id), mode='r') as f:
+            with open('blocchain-{}.bit'.format(self.node_id), mode='r') as f:
                 # file_content = pickle.loads(f.read())
                 file_content = f.readlines()
-                # blockchain = file_content['chain']
+                # blocchain = file_content['chain']
                 # open_submissions = file_content['ot']
-                blockchain = json.loads(file_content[0][:-1])
+                blocchain = json.loads(file_content[0][:-1])
                 # We need to convert  the loaded data because submissions
                 # should use OrderedDict
-                updated_blockchain = []
-                for block in blockchain:
+                updated_blocchain = []
+                for bloc in blocchain:
                     converted_tx = [Submission(
                         tx['voter'],
                         tx['candidate'],
                         tx['zero'],         #added to hold zero day countdown
                         tx['signature'],
-                        tx['amount']) for tx in block['submissions']]
-                    updated_block = Block(
-                        block['index'],
-                        block['previous_hash'],
+                        tx['amount']) for tx in bloc['submissions']]
+                    updated_bloc = Bloc(
+                        bloc['index'],
+                        bloc['previous_hash'],
                         converted_tx,
-                        block['proof'],
-                        block['timestamp'])
-                    updated_blockchain.append(updated_block)
-                self.chain = updated_blockchain
+                        bloc['proof'],
+                        bloc['timestamp'])
+                    updated_blocchain.append(updated_bloc)
+                self.chain = updated_blocchain
                 open_submissions = json.loads(file_content[1][:-1])
                 # We need to convert  the loaded data because submissions
                 # should use OrderedDict
@@ -106,17 +106,17 @@ class Blockchain:
             print('Cleanup!')
 
     def save_data(self):
-        """Save blockchain + open submissions snapshot to a file."""
+        """Save blocchain + open submissions snapshot to a file."""
         try:
-            with open('blockchain-{}.txt'.format(self.node_id), mode='w') as f:
+            with open('blocchain-{}.bit'.format(self.node_id), mode='w') as f:
                 saveable_chain = [
-                    block.__dict__ for block in
+                    bloc.__dict__ for bloc in
                     [
-                        Block(block_el.index,
-                              block_el.previous_hash,
-                              [tx.__dict__ for tx in block_el.submissions],
-                              block_el.proof,
-                              block_el.timestamp) for block_el in self.__chain
+                        Bloc(bloc_el.index,
+                              bloc_el.previous_hash,
+                              [tx.__dict__ for tx in bloc_el.submissions],
+                              bloc_el.proof,
+                              bloc_el.timestamp) for bloc_el in self.__chain
                     ]
                 ]
                 f.write(json.dumps(saveable_chain))
@@ -126,7 +126,7 @@ class Blockchain:
                 f.write('\n')
                 f.write(json.dumps(list(self.__peer_nodes)))
                 # save_data = {
-                #     'chain': blockchain,
+                #     'chain': blocchain,
                 #     'ot': open_submissions
                 # }
                 # f.write(pickle.dumps(save_data))
@@ -135,9 +135,9 @@ class Blockchain:
 
     def proof_of_work(self):
         """Generate a proof of work for the open submissions, the hash of the
-        previous block and a random number (which is guessed until it fits)."""
-        last_block = self.__chain[-1]
-        last_hash = hash_block(last_block)
+        previous bloc and a random number (which is guessed until it fits)."""
+        last_bloc = self.__chain[-1]
+        last_hash = hash_bloc(last_bloc)
         proof = 0
         # Try different PoW numbers and return the first valid one
         while not Verification.valid_proof(
@@ -159,9 +159,9 @@ class Blockchain:
         # Fetch a list of all sent coin amounts for the given person (empty
         # lists are returned if the person was NOT the voter)
         # This fetches sent amounts of submissions that were already included
-        # in blocks of the blockchain
-        tx_voter = [[tx.amount for tx in block.submissions
-                      if tx.voter == participant] for block in self.__chain]
+        # in blocs of the blocchain
+        tx_voter = [[tx.amount for tx in bloc.submissions
+                      if tx.voter == participant] for bloc in self.__chain]
         # Fetch a list of all sent coin amounts for the given person (empty
         # lists are returned if the person was NOT the voter)
         # This fetches sent amounts of open submissions (to avoid double
@@ -175,15 +175,15 @@ class Blockchain:
         amount_sent = reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt)
                              if len(tx_amt) > 0 else tx_sum + 0, tx_voter, 0)
         # This fetches received coin amounts of submissions that were already
-        # included in blocks of the blockchain
+        # included in blocs of the blocchain
         # We ignore open submissions here because you shouldn't be able to
         # spend coins before the submission was confirmed + included in a
-        # block
+        # bloc
         tx_candidate = [
             [
-                tx.amount for tx in block.submissions
+                tx.amount for tx in bloc.submissions
                 if tx.candidate == participant
-            ] for block in self.__chain
+            ] for bloc in self.__chain
         ]
         amount_received = reduce(
             lambda tx_sum, tx_amt: tx_sum + sum(tx_amt)
@@ -194,8 +194,8 @@ class Blockchain:
         # Return the total balance
         return amount_received - amount_sent
 
-    def get_last_blockchain_value(self):
-        """ Returns the last value of the current blockchain. """
+    def get_last_blocchain_value(self):
+        """ Returns the last value of the current blocchain. """
         if len(self.__chain) < 1:
             return None
         return self.__chain[-1]
@@ -212,7 +212,7 @@ class Blockchain:
                         signature,
                         amount=1.0,
                         is_receiving=False):
-        """ Append a new value as well as the last blockchain value to the blockchain.
+        """ Append a new value as well as the last blocchain value to the blocchain.
 
         Arguments:
             :voter: The person voting.
@@ -260,30 +260,35 @@ class Blockchain:
         submission_zero = (genesis_ts - time.time()) // genesis_pf
         return submission_zero
 
-    def mine_block(self):
-        """Create a new block and add open submissions to it."""
-        # Fetch the currently last block of the blockchain
+    def mine_bloc(self):
+        global VOTE_WINDOW
+        """Create a new bloc and add open submissions to it."""
+        # Fetch the currently last bloc of the blocchain
         if self.public_key is None:
             return None
-        last_block = self.__chain[-1]
-        # Hash the last block (=> to be able to compare it to the stored hash
+        last_bloc = self.__chain[-1]
+        last_pf = last_bloc.proof
+        #window = self.load_window_data()
+        # Hash the last bloc (=> to be able to compare it to the stored hash
         # value)
-        hashed_block = hash_block(last_block)
+        hashed_bloc = hash_bloc(last_bloc)
         proof = self.proof_of_work()
-        # Added to avoid blockchain startup error after genesis bloxk as it contains no submission i.e. no zero
-        last_pf = last_block.proof
+        # Added to avoid blocchain startup error after genesis bloxk as it contains no submission i.e. no zero
+        last_pf = last_bloc.proof
         if last_pf != 86400:
             zero = self.submission_zero()           
         else:
             zero = 365.0
-        # Miners should be rewarded, so let's create a reward submission
+        # Voters have the right to vote daily, so let's create a window submission
         # reward_submission = {
-        #     'voter': 'MINING',
+        #     'voter': 'STATION',
         #     'candidate': owner,
-        #     'amount': MINING_REWARD
+        #     'amount': 0 or 1
         # }
-        reward_submission = Submission(
-            'STATION', self.public_key, zero, '', WIN_VOTE)
+        Window_open = Submission(
+            'STATION', self.public_key, zero, '', 1)
+        Window_closed = Submission(
+            'STATION', self.public_key, zero, '', 0)
         # Copy submission instead of manipulating the original
         # open_submissions list
         # This ensures that if for some reason the mining should fail,
@@ -292,29 +297,35 @@ class Blockchain:
         for tx in copied_submissions:
             if not Ballot.verify_submission(tx):
                 return None
-        copied_submissions.append(reward_submission)
-        block = Block(len(self.__chain), hashed_block,
+        
+        # if global var is set to true award right and then set back to false
+        if VOTE_WINDOW is False:
+            copied_submissions.append(Window_closed)
+        else:
+            copied_submissions.append(Window_open)
+            VOTE_WINDOW = False
+        bloc = Bloc(len(self.__chain), hashed_bloc,
                       copied_submissions, proof)
-        self.__chain.append(block)
+        self.__chain.append(bloc)
         self.__open_submissions = []
         self.save_data()
         for node in self.__peer_nodes:
-            url = 'http://{}/broadcast-block'.format(node)
-            converted_block = block.__dict__.copy()
-            converted_block['submissions'] = [
-                tx.__dict__ for tx in converted_block['submissions']]
+            url = 'http://{}/broadcast-bloc'.format(node)
+            converted_bloc = bloc.__dict__.copy()
+            converted_bloc['submissions'] = [
+                tx.__dict__ for tx in converted_bloc['submissions']]
             try:
-                response = requests.post(url, json={'block': converted_block})
+                response = requests.post(url, json={'bloc': converted_bloc})
                 if response.status_code == 400 or response.status_code == 500:
-                    print('Block declined, needs resolving')
+                    print('Bloc declined, needs resolving')
                 if response.status_code == 409:
                     self.resolve_conflicts = True
             except requests.exceptions.ConnectionError:
                 continue
-        return block
+        return bloc
 
-    def add_block(self, block):
-        """Add a block which was received via broadcasting to the localb
+    def add_bloc(self, bloc):
+        """Add a bloc which was received via broadcasting to the localb
         lockchain."""
         # Create a list of submission objects
         submissions = [Submission(
@@ -322,30 +333,30 @@ class Blockchain:
             tx['candidate'],
             tx['zero'],
             tx['signature'],
-            tx['amount']) for tx in block['submissions']]
-        # Validate the proof of work of the block and store the result (True
+            tx['amount']) for tx in bloc['submissions']]
+        # Validate the proof of work of the bloc and store the result (True
         # or False) in a variable
         proof_is_valid = Verification.valid_proof(
-            submissions[:-1], block['previous_hash'], block['proof'])
-        # Check if previous_hash stored in the block is equal to the local
-        # blockchain's last block's hash and store the result in a block
-        hashes_match = hash_block(self.chain[-1]) == block['previous_hash']
+            submissions[:-1], bloc['previous_hash'], bloc['proof'])
+        # Check if previous_hash stored in the bloc is equal to the local
+        # blocchain's last bloc's hash and store the result in a bloc
+        hashes_match = hash_bloc(self.chain[-1]) == bloc['previous_hash']
         if not proof_is_valid or not hashes_match:
             return False
-        # Create a Block object
-        converted_block = Block(
-            block['index'],
-            block['previous_hash'],
+        # Create a bloc object
+        converted_bloc = Bloc(
+            bloc['index'],
+            bloc['previous_hash'],
             submissions,
-            block['proof'],
-            block['timestamp'])
-        self.__chain.append(converted_block)
+            bloc['proof'],
+            bloc['timestamp'])
+        self.__chain.append(converted_bloc)
         stored_submissions = self.__open_submissions[:]
-        # Check which open submissions were included in the received block
+        # Check which open submissions were included in the received bloc
         # and remove them
         # This could be improved by giving each submission an ID that would
         # uniquely identify it
-        for itx in block['submissions']:
+        for itx in bloc['submissions']:
             for opentx in stored_submissions:
                 if (opentx.voter == itx['voter'] and
                         opentx.candidate == itx['candidate'] and
@@ -360,7 +371,7 @@ class Blockchain:
         return True
 
     def resolve(self):
-        """Checks all peer nodes' blockchains and replaces the local one with
+        """Checks all peer nodes' blocchains and replaces the local one with
         longer valid ones."""
         # Initialize the winner chain with the local chain
         winner_chain = self.chain
@@ -372,21 +383,21 @@ class Blockchain:
                 response = requests.get(url)
                 # Retrieve the JSON data as a dictionary
                 node_chain = response.json()
-                # Convert the dictionary list to a list of block AND
+                # Convert the dictionary list to a list of bloc AND
                 # submission objects
                 node_chain = [
-                    Block(block['index'],
-                          block['previous_hash'],
+                    Bloc(bloc['index'],
+                          bloc['previous_hash'],
                           [
                         Submission(
                             tx['voter'],
                             tx['candidate'],
                             tx['zero'],
                             tx['signature'],
-                            tx['amount']) for tx in block['submissions']
+                            tx['amount']) for tx in bloc['submissions']
                     ],
-                        block['proof'],
-                        block['timestamp']) for block in node_chain
+                        bloc['proof'],
+                        bloc['timestamp']) for bloc in node_chain
                 ]
                 node_chain_length = len(node_chain)
                 local_chain_length = len(winner_chain)
