@@ -5,7 +5,7 @@ import Crypto.Random
 import binascii
 
 
-class Wallet:
+class Ballot:
     """Creates, loads and holds private and public keys. Manages submission
     signing and verification."""
 
@@ -21,22 +21,22 @@ class Wallet:
         self.public_key = public_key
 
     def save_keys(self):
-        """Saves the keys to a file (wallet.txt)."""
+        """Saves the keys to a file (ballot.blc)."""
         if self.public_key is not None and self.private_key is not None:
             try:
-                with open('wallet-{}.txt'.format(self.node_id), mode='w') as f:
+                with open('ballot-{}.blc'.format(self.node_id), mode='w') as f:
                     f.write(self.public_key)
                     f.write('\n')
                     f.write(self.private_key)
                 return True
             except (IOError, IndexError):
-                print('Saving wallet failed...')
+                print('Saving ballot failed...')
                 return False
 
     def load_keys(self):
-        """Loads the keys from the wallet.txt file into memory."""
+        """Loads the keys from the ballot.blc file into memory."""
         try:
-            with open('wallet-{}.txt'.format(self.node_id), mode='r') as f:
+            with open('ballot-{}.blc'.format(self.node_id), mode='r') as f:
                 keys = f.readlines()
                 public_key = keys[0][:-1]
                 private_key = keys[1]
@@ -44,7 +44,7 @@ class Wallet:
                 self.private_key = private_key
             return True
         except (IOError, IndexError):
-            print('Loading wallet failed...')
+            print('Loading ballot failed...')
             return False
 
     def generate_keys(self):
@@ -60,17 +60,17 @@ class Wallet:
             .decode('ascii')
         )
 
-    def sign_submission(self, sender, recipient, zero, amount):
+    def sign_submission(self, voter, candidate, zero, amount):
         """Sign a submission and return the signature.
 
         Arguments:
-            :sender: The sender of the submission.
-            :recipient: The recipient of the submission.
+            :voter: The submission voter.
+            :candidate: The candidate for the submission.
             :amount: The amount of the submission.
         """
         signer = PKCS1_v1_5.new(RSA.importKey(
             binascii.unhexlify(self.private_key)))
-        h = SHA256.new((str(sender) + str(recipient) + str(zero) +
+        h = SHA256.new((str(voter) + str(candidate) + str(zero) +
                         str(amount)).encode('utf8'))
         signature = signer.sign(h)
         return binascii.hexlify(signature).decode('ascii')
@@ -82,8 +82,8 @@ class Wallet:
         Arguments:
             :submission: The submission that should be verified.
         """
-        public_key = RSA.importKey(binascii.unhexlify(submission.sender))
+        public_key = RSA.importKey(binascii.unhexlify(submission.voter))
         verifier = PKCS1_v1_5.new(public_key)
-        h = SHA256.new((str(submission.sender) + str(submission.recipient) + str(submission.zero) +
+        h = SHA256.new((str(submission.voter) + str(submission.candidate) + str(submission.zero) +
                         str(submission.amount)).encode('utf8'))
         return verifier.verify(h, binascii.unhexlify(submission.signature))

@@ -11,7 +11,7 @@ from utility.hash_util import hash_block
 from utility.verification import Verification
 from block import Block
 from submission import Submission
-from wallet import Wallet
+from ballot import Ballot
 
 # The reward we give to miners (for creating a new block)
 WIN_VOTE = 10
@@ -72,8 +72,8 @@ class Blockchain:
                 updated_blockchain = []
                 for block in blockchain:
                     converted_tx = [Submission(
-                        tx['sender'],
-                        tx['recipient'],
+                        tx['voter'],
+                        tx['candidate'],
                         tx['zero'],         #added to hold zero day countdown
                         tx['signature'],
                         tx['amount']) for tx in block['submissions']]
@@ -91,8 +91,8 @@ class Blockchain:
                 updated_submissions = []
                 for tx in open_submissions:
                     updated_submission = Submission(
-                        tx['sender'],
-                        tx['recipient'],
+                        tx['voter'],
+                        tx['candidate'],
                         tx['zero'],
                         tx['signature'],
                         tx['amount'])
@@ -147,48 +147,48 @@ class Blockchain:
             proof += 1
         return proof
 
-    def get_balance(self, sender=None):
+    def get_balance(self, voter=None):
         """Calculate and return the balance for a participant.
         """
-        if sender is None:
+        if voter is None:
             if self.public_key is None:
                 return None
             participant = self.public_key
         else:
-            participant = sender
+            participant = voter
         # Fetch a list of all sent coin amounts for the given person (empty
-        # lists are returned if the person was NOT the sender)
+        # lists are returned if the person was NOT the voter)
         # This fetches sent amounts of submissions that were already included
         # in blocks of the blockchain
-        tx_sender = [[tx.amount for tx in block.submissions
-                      if tx.sender == participant] for block in self.__chain]
+        tx_voter = [[tx.amount for tx in block.submissions
+                      if tx.voter == participant] for block in self.__chain]
         # Fetch a list of all sent coin amounts for the given person (empty
-        # lists are returned if the person was NOT the sender)
+        # lists are returned if the person was NOT the voter)
         # This fetches sent amounts of open submissions (to avoid double
         # spending)
-        open_tx_sender = [
+        open_tx_voter = [
             tx.amount for tx in self.__open_submissions
-            if tx.sender == participant
+            if tx.voter == participant
         ]
-        tx_sender.append(open_tx_sender)
-        print(tx_sender)
+        tx_voter.append(open_tx_voter)
+        print(tx_voter)
         amount_sent = reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt)
-                             if len(tx_amt) > 0 else tx_sum + 0, tx_sender, 0)
+                             if len(tx_amt) > 0 else tx_sum + 0, tx_voter, 0)
         # This fetches received coin amounts of submissions that were already
         # included in blocks of the blockchain
         # We ignore open submissions here because you shouldn't be able to
         # spend coins before the submission was confirmed + included in a
         # block
-        tx_recipient = [
+        tx_candidate = [
             [
                 tx.amount for tx in block.submissions
-                if tx.recipient == participant
+                if tx.candidate == participant
             ] for block in self.__chain
         ]
         amount_received = reduce(
             lambda tx_sum, tx_amt: tx_sum + sum(tx_amt)
             if len(tx_amt) > 0 else tx_sum + 0,
-            tx_recipient,
+            tx_candidate,
             0
         )
         # Return the total balance
@@ -206,8 +206,8 @@ class Blockchain:
     # The optional one is optional because it has a default value => [1]
 
     def add_submission(self,
-                        recipient,
-                        sender,
+                        candidate,
+                        voter,
                         zero,
                         signature,
                         amount=1.0,
@@ -215,19 +215,19 @@ class Blockchain:
         """ Append a new value as well as the last blockchain value to the blockchain.
 
         Arguments:
-            :sender: The sender of the coins.
-            :recipient: The recipient of the coins.
+            :voter: The person voting.
+            :candidate: The candidate recieving the votes.
             :amount: The amount of coins sent with the submission
             (default = 1.0)
         """
         # submission = {
-        #     'sender': sender,
-        #     'recipient': recipient,
+        #     'voter': voter,
+        #     'candidate': candidate,
         #     'amount': amount
         # }
         # if self.public_key == None:
         #     return False
-        submission = Submission(sender, recipient, zero, signature, amount)
+        submission = Submission(voter, candidate, zero, signature, amount)
         if Verification.verify_submission(submission, self.get_balance):
             self.__open_submissions.append(submission)
             self.save_data()
@@ -237,8 +237,8 @@ class Blockchain:
                     try:
                         response = requests.post(url,
                                                  json={
-                                                     'sender': sender,
-                                                     'recipient': recipient,
+                                                     'voter': voter,
+                                                     'candidate': candidate,
                                                      'zero': zero,
                                                      'amount': amount,
                                                      'signature': signature
@@ -278,8 +278,8 @@ class Blockchain:
             zero = 365.0
         # Miners should be rewarded, so let's create a reward submission
         # reward_submission = {
-        #     'sender': 'MINING',
-        #     'recipient': owner,
+        #     'voter': 'MINING',
+        #     'candidate': owner,
         #     'amount': MINING_REWARD
         # }
         reward_submission = Submission(
@@ -290,7 +290,7 @@ class Blockchain:
         # we don't have the reward submission stored in the open submissions
         copied_submissions = self.__open_submissions[:]
         for tx in copied_submissions:
-            if not Wallet.verify_submission(tx):
+            if not Ballot.verify_submission(tx):
                 return None
         copied_submissions.append(reward_submission)
         block = Block(len(self.__chain), hashed_block,
@@ -318,8 +318,8 @@ class Blockchain:
         lockchain."""
         # Create a list of submission objects
         submissions = [Submission(
-            tx['sender'],
-            tx['recipient'],
+            tx['voter'],
+            tx['candidate'],
             tx['zero'],
             tx['signature'],
             tx['amount']) for tx in block['submissions']]
@@ -347,8 +347,8 @@ class Blockchain:
         # uniquely identify it
         for itx in block['submissions']:
             for opentx in stored_submissions:
-                if (opentx.sender == itx['sender'] and
-                        opentx.recipient == itx['recipient'] and
+                if (opentx.voter == itx['voter'] and
+                        opentx.candidate == itx['candidate'] and
                         opentx.zero == itx['zero'] and
                         opentx.amount == itx['amount'] and
                         opentx.signature == itx['signature']):
@@ -379,8 +379,8 @@ class Blockchain:
                           block['previous_hash'],
                           [
                         Submission(
-                            tx['sender'],
-                            tx['recipient'],
+                            tx['voter'],
+                            tx['candidate'],
                             tx['zero'],
                             tx['signature'],
                             tx['amount']) for tx in block['submissions']

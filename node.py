@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
-from wallet import Wallet
+from ballot import Ballot
 from blockchain import Blockchain
 
 app = Flask(__name__)
@@ -18,15 +18,15 @@ def get_network_ui():
     return send_from_directory('ui', 'network.html')
 
 
-@app.route('/wallet', methods=['POST'])
+@app.route('/ballot', methods=['POST'])
 def create_keys():
-    wallet.create_keys()
-    if wallet.save_keys():
+    ballot.create_keys()
+    if ballot.save_keys():
         global blockchain
-        blockchain = Blockchain(wallet.public_key, port)
+        blockchain = Blockchain(ballot.public_key, port)
         response = {
-            'public_key': wallet.public_key,
-            'private_key': wallet.private_key,
+            'public_key': ballot.public_key,
+            'private_key': ballot.private_key,
             'funds': blockchain.get_balance()
         }
         return jsonify(response), 201
@@ -37,14 +37,14 @@ def create_keys():
         return jsonify(response), 500
 
 
-@app.route('/wallet', methods=['GET'])
+@app.route('/ballot', methods=['GET'])
 def load_keys():
-    if wallet.load_keys():
+    if ballot.load_keys():
         global blockchain
-        blockchain = Blockchain(wallet.public_key, port)
+        blockchain = Blockchain(ballot.public_key, port)
         response = {
-            'public_key': wallet.public_key,
-            'private_key': wallet.private_key,
+            'public_key': ballot.public_key,
+            'private_key': ballot.private_key,
             'funds': blockchain.get_balance()
         }
         return jsonify(response), 201
@@ -67,7 +67,7 @@ def get_balance():
     else:
         response = {
             'messsage': 'Loading balance failed.',
-            'wallet_set_up': wallet.public_key is not None
+            'ballot_set_up': ballot.public_key is not None
         }
         return jsonify(response), 500
 
@@ -78,13 +78,13 @@ def broadcast_submission():
     if not values:
         response = {'message': 'No data found.'}
         return jsonify(response), 400
-    required = ['sender', 'recipient', 'amount', 'signature']
+    required = ['voter', 'candidate', 'amount', 'signature']
     if not all(key in values for key in required):
         response = {'message': 'Some data is missing.'}
         return jsonify(response), 400
     success = blockchain.add_submission(
-        values['recipient'],
-        values['sender'],
+        values['candidate'],
+        values['voter'],
         values['zero'],
         values['signature'],
         values['amount'],
@@ -93,8 +93,8 @@ def broadcast_submission():
         response = {
             'message': 'Successfully added submission.',
             'submission': {
-                'sender': values['sender'],
-                'recipient': values['recipient'],
+                'voter': values['voter'],
+                'candidate': values['candidate'],
                 'zero': values['zero'],
                 'amount': values['amount'],
                 'signature': values['signature']
@@ -138,9 +138,9 @@ def broadcast_block():
 
 @app.route('/submission', methods=['POST'])
 def add_submission():
-    if wallet.public_key is None:
+    if ballot.public_key is None:
         response = {
-            'message': 'No wallet set up.'
+            'message': 'No ballot set up.'
         }
         return jsonify(response), 400
     values = request.get_json()
@@ -149,24 +149,24 @@ def add_submission():
             'message': 'No data found.'
         }
         return jsonify(response), 400
-    required_fields = ['recipient', 'amount']
+    required_fields = ['candidate', 'amount']
     if not all(field in values for field in required_fields):
         response = {
             'message': 'Required data is missing.'
         }
         return jsonify(response), 400
-    recipient = values['recipient']
+    candidate = values['candidate']
     amount = values['amount']
     zero = blockchain.submission_zero()
-    signature = wallet.sign_submission(wallet.public_key, recipient, zero, amount)
+    signature = ballot.sign_submission(ballot.public_key, candidate, zero, amount)
     success = blockchain.add_submission(
-        recipient, wallet.public_key, zero, signature, amount)
+        candidate, ballot.public_key, zero, signature, amount)
     if success:
         response = {
             'message': 'Successfully added submission.',
             'submission': {
-                'sender': wallet.public_key,
-                'recipient': recipient,
+                'voter': ballot.public_key,
+                'candidate': candidate,
                 'zero': zero,
                 'amount': amount,
                 'signature': signature
@@ -200,7 +200,7 @@ def mine():
     else:
         response = {
             'message': 'Adding a block failed.',
-            'wallet_set_up': wallet.public_key is not None
+            'ballot_set_up': ballot.public_key is not None
         }
         return jsonify(response), 500
 
@@ -284,6 +284,6 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--port', type=int, default=5000)
     args = parser.parse_args()
     port = args.port
-    wallet = Wallet(port)
-    blockchain = Blockchain(wallet.public_key, port)
+    ballot = Ballot(port)
+    blockchain = Blockchain(ballot.public_key, port)
     app.run(host='0.0.0.0', port=port)

@@ -1,7 +1,7 @@
 """Provides verification helper methods."""
 
 from utility.hash_util import hash_string_256, hash_block
-from wallet import Wallet
+from ballot import Ballot
 
 
 class Verification:
@@ -52,17 +52,17 @@ class Verification:
 
     @staticmethod
     def verify_submission(submission, get_balance, check_funds=True):
-        """Verify a submission by checking whether the sender has sufficient coins.
+        """Verify a submission by checking whether the voter has a right.
 
         Arguments:
             :submission: The submission that should be verified.
         """
         if check_funds:
-            sender_balance = get_balance(submission.sender)
-            return (sender_balance >= submission.amount and
-                    Wallet.verify_submission(submission))
+            voter_balance = get_balance(submission.voter)
+            return (voter_balance >= submission.amount and
+                    Ballot.verify_submission(submission))
         else:
-            return Wallet.verify_submission(submission)
+            return Ballot.verify_submission(submission)
 
     @classmethod
     def verify_submissions(cls, open_submissions, get_balance):
