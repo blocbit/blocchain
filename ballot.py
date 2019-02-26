@@ -66,7 +66,7 @@ class Ballot:
         Arguments:
             :voter: The submission voter.
             :candidate: The candidate for the submission.
-            :amount: The amount of the submission.
+            :amount: The votes in the submission.
         """
         signer = PKCS1_v1_5.new(RSA.importKey(
             binascii.unhexlify(self.private_key)))

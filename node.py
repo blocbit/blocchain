@@ -156,7 +156,7 @@ def add_submission():
         }
         return jsonify(response), 400
     candidate = values['candidate']
-    amount = values['amount']
+    amount = 1
     zero = blocchain.submission_zero()
     signature = ballot.sign_submission(ballot.public_key, candidate, zero, amount)
     success = blocchain.add_submission(

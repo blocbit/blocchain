@@ -73,10 +73,10 @@
                 </div>
             </div>
             <hr>
-            <div v-if="error" class="alert alert-danger" role="alert">
+            <div v-if="error" class="alert alert-danger" role="alert" style="word-wrap: break-word;">
                 {{ error }}
             </div>
-            <div v-if="success" class="alert alert-success" role="alert">
+            <div v-if="success" class="alert alert-success" role="alert" style="word-wrap: break-word;">
                 {{ success }}
             </div>
             <div class="row">
@@ -98,13 +98,13 @@
                     </div>
                 </div>
                 <div class="col text-right">
-                    <h2>Votes: {{ funds.toFixed(2) }}</h2>
+                    <h2>☑ {{ funds.toFixed(2) }}</h2>
                 </div>
             </div>
             <hr>
             <div v-if="!ballot" class="row">
                 <div class="col">
-                    <div class="alert alert-warning">Create a Ballot to start voting!</div>
+                    <div class="alert alert-warning">Create or Load a Ballot to start voting!</div>
                 </div>
             </div>
             <div v-if="ballot" class="row">
@@ -114,18 +114,18 @@
                             <label for="candidate">Candidate Key</label>
                             <input v-model="outgoingTx.candidate" type="text" class="form-control" id="candidate" placeholder="Enter key">
                         </div>
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                             <label for="amount">Votes</label>
                             <input v-model.number="outgoingTx.amount" type="number" step="0.001" class="form-control" id="amount">
                             <small class="form-text text-muted">Fractions are possible (e.g. 5.67)</small>
-                        </div>
+                        </div> -->
                         <div v-if="txLoading" class="lds-ring">
                             <div></div>
                             <div></div>
                             <div></div>
                             <div></div>
                         </div>
-                        <button :disabled="txLoading || outgoingTx.candidate.trim() === '' || outgoingTx.amount <= 0" type="submit" class="btn btn-primary">Send</button>
+                        <button :disabled="txLoading || outgoingTx.candidate.trim() === ''" type="submit" class="btn btn-primary">Vote</button>
                     </form>
                 </div>
             </div>
@@ -170,10 +170,11 @@
                                 <div class="card-body">
                                     <p>Previous Hash: {{ data.previous_hash }}</p>
                                     <div class="list-group">
-                                        <div v-for="tx in data.submissions" class="list-group-item flex-column align-items-start">
-                                            <div>Voter: {{ tx.voter }}</div>
-                                            <div>Candidate: {{ tx.candidate }}</div>
-                                            <div>Votes: {{ tx.amount }}</div>
+                                        <div v-for="tx in data.submissions" class="list-group-item flex-column align-items-start" align="center">
+                                            <div>{{ tx.voter }}</div>
+                                            <div>↧</div>
+                                            <div>{{ tx.candidate }}</div>
+                                            <div id="amount">{{ tx.amount }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -189,10 +190,11 @@
                             <div v-if="view === 'tx'" class="collapse" :class="{show: showElement === index}">
                                 <div class="card-body">
                                     <div class="list-group">
-                                        <div class="list-group-item flex-column align-items-start">
-                                            <div>Voter: {{ data.voter }}</div>
-                                            <div>Candidate: {{ data.candidate }}</div>
-                                            <div>Votes: {{ data.amount }}</div>
+                                        <div class="list-group-item flex-column align-items-start" align="center">
+                                            <div>{{ data.voter }}</div>
+                                            <div>↧</div>
+                                            <div>{{ data.candidate }}</div>
+                                            <div id="amount">{{ data.amount }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -206,6 +208,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        var strMessage1 = document.getElementById("amount") ;
+        strMessage1.innerHTML = strMessage1.innerHTML.replace( "1","✓") ;
+        
+   </script>
     <script>
         new Vue({
             el: '#app',
@@ -243,7 +250,7 @@
                     axios.post('/ballot')
                         .then(function (response) {
                             vm.error = null;
-                            vm.success = 'Ballot Created! Public Key: ' + response.data.public_key + ', Private Key: ' + response.data.private_key;
+                            vm.success = 'Ballot Created! Public Key: ' + response.data.public_key;// + ', Private Key: ' + response.data.private_key;
                             vm.ballot = {
                                 public_key: response.data.public_key,
                                 private_key: response.data.private_key
@@ -265,7 +272,7 @@
                     axios.get('/ballot')
                         .then(function (response) {
                             vm.error = null;
-                            vm.success = 'Ballot Created! Public Key: ' + response.data.public_key + ', Private Key: ' + response.data.private_key;
+                            vm.success = 'Ballot Created! Public Key: ' + response.data.public_key;// + ', Private Key: ' + response.data.private_key;
                             vm.ballot = {
                                 public_key: response.data.public_key,
                                 private_key: response.data.private_key

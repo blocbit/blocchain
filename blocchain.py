@@ -13,7 +13,7 @@ from bloc import Bloc
 from submission import Submission
 from ballot import Ballot
 
-# The reward we give to miners (for creating a new bloc)
+# The rights given to voters(for adding a new bloc)
 VOTE_WINDOW = True
 
 print(__name__)
@@ -74,7 +74,7 @@ class Blocchain:
                     converted_tx = [Submission(
                         tx['voter'],
                         tx['candidate'],
-                        tx['zero'],         #added to hold zero day countdown
+                        tx['zero'],         #added to hold day zero, countdown until final vote
                         tx['signature'],
                         tx['amount']) for tx in bloc['submissions']]
                     updated_bloc = Bloc(
@@ -133,13 +133,13 @@ class Blocchain:
         except IOError:
             print('Saving failed!')
 
-    def proof_of_work(self):
-        """Generate a proof of work for the open submissions, the hash of the
+    def proof_by_vote(self):
+        """Generate a proof by vote for the open submissions, the hash of the
         previous bloc and a random number (which is guessed until it fits)."""
         last_bloc = self.__chain[-1]
         last_hash = hash_bloc(last_bloc)
         proof = 0
-        # Try different PoW numbers and return the first valid one
+        # Try different Pbv numbers and return the first valid one
         while not Verification.valid_proof(
             self.__open_submissions,
             last_hash, proof
@@ -156,15 +156,15 @@ class Blocchain:
             participant = self.public_key
         else:
             participant = voter
-        # Fetch a list of all sent coin amounts for the given person (empty
+        # Fetch a list of all submitted votes for the given person (empty
         # lists are returned if the person was NOT the voter)
-        # This fetches sent amounts of submissions that were already included
+        # This fetches votes in submissions that were already included
         # in blocs of the blocchain
         tx_voter = [[tx.amount for tx in bloc.submissions
                       if tx.voter == participant] for bloc in self.__chain]
-        # Fetch a list of all sent coin amounts for the given person (empty
+        # Fetch a list of all submitted votes for the given person (empty
         # lists are returned if the person was NOT the voter)
-        # This fetches sent amounts of open submissions (to avoid double
+        # This fetches submitted votes in open submissions (to avoid double
         # spending)
         open_tx_voter = [
             tx.amount for tx in self.__open_submissions
@@ -174,10 +174,10 @@ class Blocchain:
         print(tx_voter)
         amount_sent = reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt)
                              if len(tx_amt) > 0 else tx_sum + 0, tx_voter, 0)
-        # This fetches received coin amounts of submissions that were already
+        # This fetches received votes in submissions that were already
         # included in blocs of the blocchain
         # We ignore open submissions here because you shouldn't be able to
-        # spend coins before the submission was confirmed + included in a
+        # vote before the submission was confirmed + included in a
         # bloc
         tx_candidate = [
             [
@@ -191,7 +191,7 @@ class Blocchain:
             tx_candidate,
             0
         )
-        # Return the total balance
+        # Return the total votes
         return amount_received - amount_sent
 
     def get_last_blocchain_value(self):
@@ -217,7 +217,7 @@ class Blocchain:
         Arguments:
             :voter: The person voting.
             :candidate: The candidate recieving the votes.
-            :amount: The amount of coins sent with the submission
+            :amount: The amount of votes sent with the submission
             (default = 1.0)
         """
         # submission = {
@@ -267,27 +267,28 @@ class Blocchain:
         if self.public_key is None:
             return None
         last_bloc = self.__chain[-1]
-        last_pf = last_bloc.proof
+        #last_pf = last_bloc.proof
         #window = self.load_window_data()
         # Hash the last bloc (=> to be able to compare it to the stored hash
         # value)
         hashed_bloc = hash_bloc(last_bloc)
-        proof = self.proof_of_work()
+        proof = self.proof_by_vote()
         # Added to avoid blocchain startup error after genesis bloxk as it contains no submission i.e. no zero
-        last_pf = last_bloc.proof
-        if last_pf != 86400:
-            zero = self.submission_zero()           
-        else:
-            zero = 365.0
+        # last_pf = last_bloc.proof
+        # if last_pf != 86400:
+        #     zero = self.submission_zero()           
+        # else:
+        #     zero = 365.0
+        zero = self.submission_zero()
         # Voters have the right to vote daily, so let's create a window submission
         # reward_submission = {
         #     'voter': 'STATION',
         #     'candidate': owner,
         #     'amount': 0 or 1
         # }
-        Window_open = Submission(
+        Station_open = Submission(
             'STATION', self.public_key, zero, '', 1)
-        Window_closed = Submission(
+        Station_closed = Submission(
             'STATION', self.public_key, zero, '', 0)
         # Copy submission instead of manipulating the original
         # open_submissions list
@@ -300,9 +301,9 @@ class Blocchain:
         
         # if global var is set to true award right and then set back to false
         if VOTE_WINDOW is False:
-            copied_submissions.append(Window_closed)
+            copied_submissions.append(Station_closed)
         else:
-            copied_submissions.append(Window_open)
+            copied_submissions.append(Station_open)
             VOTE_WINDOW = False
         bloc = Bloc(len(self.__chain), hashed_bloc,
                       copied_submissions, proof)

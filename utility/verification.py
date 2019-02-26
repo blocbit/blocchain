@@ -9,11 +9,11 @@ class Verification:
     and validation methods."""
     @staticmethod
     def valid_proof(submissions, last_hash, proof):
-        """Validate a proof of work number and see if it solves the puzzle
-        algorithm (two leading 0s)
+        """Validate a proof by vote number and see if it solves the puzzle
+        algorithm (for now, two leading 0s)
 
         Arguments:
-            :submissions: The submissions of the bloc for which the proof
+            :submissions: The submissions in the bloc for which the proof
             is created.
             :last_hash: The previous bloc's hash which will be stored in the
             current bloc.
@@ -46,13 +46,13 @@ class Verification:
             if not cls.valid_proof(bloc.submissions[:-1],
                                    bloc.previous_hash,
                                    bloc.proof):
-                print('Proof of work is invalid')
+                print('Proof by vote is invalid')
                 return False
         return True
 
     @staticmethod
     def verify_submission(submission, get_balance, check_funds=True):
-        """Verify a submission by checking whether the voter has a right.
+        """Verify a submission by checking whether the voter has the right.
 
         Arguments:
             :submission: The submission that should be verified.
