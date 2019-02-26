@@ -1,4 +1,4 @@
-# Bloc.bit blocchain
+# Bloc.bit (blocchain)
 
 
 support this project :
