@@ -263,9 +263,13 @@ class Blocchain:
     def mine_bloc(self):
         global VOTE_WINDOW
         """Create a new bloc and add open submissions to it."""
-        # Fetch the currently last bloc of the blocchain
+        # update your ip (only if your publickey is registered) so that mining can be shared with all nodes
         if self.public_key is None:
             return None
+
+        publickey = {"publickey": self.public_key}
+        requests.post('https://blocbit.net/kitty.php' ,params=publickey)
+        # Fetch the currently last bloc of the blocchain
         last_bloc = self.__chain[-1]
         #last_pf = last_bloc.proof
         #window = self.load_window_data()
@@ -437,5 +441,6 @@ class Blocchain:
         self.save_data()
 
     def get_peer_nodes(self):
-        """Return a list of all connected peer nodes."""
+        """Adds current peer to api and Returns a list of all connected peer nodes."""
+        
         return list(self.__peer_nodes)

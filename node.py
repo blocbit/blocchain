@@ -214,7 +214,6 @@ def resolve_conflicts():
         response = {'message': 'Local chain kept!'}
     return jsonify(response), 200
 
-
 @app.route('/submissions', methods=['GET'])
 def get_open_submission():
     submissions = blocchain.get_open_submissions()
@@ -281,9 +280,13 @@ def get_nodes():
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    parser.add_argument('-p', '--port', type=int, default=5000)
+    parser.add_argument('-p', '--port', type=int, default=8105)
     args = parser.parse_args()
     port = args.port
     ballot = Ballot(port)
     blocchain = Blocchain(ballot.public_key, port)
+
+    blocchain.add_peer_node('https://explorer.blocbit.net')
+
+
     app.run(host='0.0.0.0', port=port)
