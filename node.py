@@ -1,21 +1,26 @@
-from flask import Flask, jsonify, request, send_from_directory
+import os
+from flask import Flask, jsonify, request, send_from_directory, redirect, render_template, session, url_for
 from flask_cors import CORS
-
+from functools import wraps
 from ballot import Ballot
 from blocchain import Blocchain
 
 app = Flask(__name__)
 CORS(app)
+app_name = 'Blocbit'
 
-
-@app.route('/', methods=['GET'])
+@app.route('/node', methods=['GET'])
 def get_node_ui():
-    return send_from_directory('ui', 'node.html')
+    return send_from_directory('static', 'node.html')
 
+@app.route('/')
+def home():
+   return render_template('grid.html',
+            title='Concepts', app_name=app_name)
 
 @app.route('/network', methods=['GET'])
 def get_network_ui():
-    return send_from_directory('ui', 'network.html')
+    return send_from_directory('static', 'network.html')
 
 
 @app.route('/ballot', methods=['POST'])

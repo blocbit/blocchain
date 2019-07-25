@@ -1,64 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<!-- Head -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Blocbit</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
-        crossorigin="anonymous">
-    <style>
-                body {
-                    background-image: url('http://127.0.0.1:43110/bloc.bit/img/login-bk.jpg');
-                    height: 100%; 
-                    width: 100%; 
-                    background-repeat: no-repeat; 
-                    background-attachment: fixed; 
-                    background-position: center; 
-                    background-size: cover;
-                }
-        
-                .container {
-                    max-width: 90%;
-                    margin-top: 5%;
-                }
-        
-                h2 {
-                font-size: initial; 
-                color: white;
-                }
-
-                label {
-                color: white;
-                }
-                
-                hr {
-                border-top: 1px solid #f8f9fa;
-                }
-    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/yeti/bootstrap.css">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
 </head>
-
+<!-- Head -->
 <body>
+    <!-- NavBar-->
+    <nav class="navbar navbar-inverse navbar-default">
+            <div class="container-fluid">
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">
+                  <span class="glyphicon glyphicon-barcode" aria-hidden="true"></span>
+                  Blocbit
+                </a>
+              </div>
+          
+              <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                  <li>
+                    <a href="/">
+                        <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span>
+                    </a>
+                  </li>
+                    <li>
+                      <a href="/node"><span class="glyphicon glyphicon-barcode" aria-hidden="true"></span></a>
+                    </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+<!-- NavBar-->
+<!-- Body-->
     <div id="app">
         <div class="container">
-            <div class="row">
-                <div class="col">
-                    <ul class="nav nav-pills">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/">Wallet &amp; Node</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/network">Network</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <hr>
-            <div v-if="error" class="alert alert-danger" role="alert">
+            <div v-if="error" class="alert alert-danger" role="alert" style="word-wrap: break-word;">
                 {{ error }}
             </div>
-            <div v-if="success" class="alert alert-success" role="alert">
+            <div v-if="success" class="alert alert-success" role="alert" style="word-wrap: break-word;">
                 {{ success }}
             </div>
             <div class="row">
@@ -68,14 +62,14 @@
                             <label for="node-url">Node URL</label>
                             <input v-model="newNodeUrl" type="text" class="form-control" id="node-url" placeholder="localhost:5001">
                         </div>
-                        <button :disabled="newNodeUrl.trim() === ''" type="submit" class="btn btn-primary">Add</button>
+                        <button :disabled="newNodeUrl.trim() === ''" type="submit" class="btn btn-white">Add</button>
                     </form>
                 </div>
             </div>
             <hr>
             <div class="row my-3">
                 <div class="col">
-                    <button class="btn btn-primary" @click="onLoadNodes">Load Peer Nodes</button>
+                    <button class="btn btn-white" @click="onLoadNodes">Load Peer Nodes</button>
                 </div>
             </div>
             <div class="row">
@@ -92,6 +86,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script
+	  src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+	  integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+	  crossorigin="anonymous"></script>
+	<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+	<script src="https://npmcdn.com/imagesloaded@4.1/imagesloaded.pkgd.min.js"></script>
+	<script src="/static/js/main.js"></script>
     <script>
         new Vue({
             el: '#app',
