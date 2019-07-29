@@ -1,7 +1,19 @@
-FROM python:3
+FROM python:3.7-alpine as base
 
-ADD . /
+from base as builder
 
-RUN pip install -r requirements.txt
+RUN mkdir /install
+WORKDIR /install
+
+COPY requirements.txt /requirements.txt
+
+RUN pip install --install-option"--prefix=/install" -r /requirements.txt
+
+FROM base
+
+COPY --from=builder /install /usr/local
+COPY src /app
+
+WORKDIR /app
 
 CMD [ "python", "./node.py" ]
