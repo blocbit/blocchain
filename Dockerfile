@@ -1,19 +1,7 @@
-FROM python:3.7-alpine as base
+FROM python:3.7-slim-buster 
 
-from base as builder
+ADD . /
 
-RUN mkdir /install
-WORKDIR /install
-
-COPY requirements.txt /requirements.txt
-
-RUN pip install --install-option="--prefix=/install" -r /requirements.txt
-
-FROM base
-
-COPY --from=builder /install /usr/local
-COPY src /app
-
-WORKDIR /app
+RUN pip install -r requirements.txt
 
 CMD [ "python", "./node.py" ]
