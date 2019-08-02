@@ -16,6 +16,7 @@ imagePullSecrets: []
   # - name: myRegistryKeySecretName
 service:
   port: 80
+  tport: 8105
 
 ingress:
   enabled: true
