@@ -22,7 +22,7 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: addon-http-application-routing
   path: /
-  hostname: VALUE_TO_BE_OVERRIDDEN
+  hostname: app.blocbit.org
 
 secrets: {}
   # Optionally specify a set of secret objects whose values
