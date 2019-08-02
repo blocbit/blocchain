@@ -1,11 +1,11 @@
-# Default values for sampleapp.
+# Default values for blocbit.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 fullnameOverride: blocbit
 replicaCount: 2
 image:
-  repository: blocbit.azurecr.io/blocbit3554
-  tag: 17
+  repository: VALUE_TO_BE_OVERRIDDEN
+  tag: latest
 
 imagePullSecrets: []
   # Optionally specify an array of imagePullSecrets.
@@ -18,7 +18,7 @@ service:
   port: 80
 
 ingress:
-  enabled: false
+  enabled: true
   annotations:
     kubernetes.io/ingress.class: addon-http-application-routing
   path: /
