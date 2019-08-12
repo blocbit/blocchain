@@ -17,13 +17,14 @@ imagePullSecrets: []
 service:
   port: 80
   tport: 8105
+  pip: 40.121.183.52
 
 ingress:
   enabled: true
   annotations:
     kubernetes.io/ingress.class: addon-http-application-routing
   path: /
-  hostname: app.blocbit.org
+  hostname: blocbit.eastus.cloudapp.azure.com
 
 secrets: {}
   # Optionally specify a set of secret objects whose values

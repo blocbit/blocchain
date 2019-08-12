@@ -11,6 +11,7 @@ spec:
   {{- if .Values.ingress.enabled }}
   type: ClusterIP
   {{- else }}
+  loadBalancerIP: {{ .Values.service.pip }}
   type: LoadBalancer
   {{- end }}
   ports:
