@@ -10,11 +10,11 @@ metadata:
     chart: nginx-ingress-1.14.0
     component: controller
     heritage: Tiller
-    release: broken-grasshopper
-  name: broken-grasshopper-nginx-ingress-controller
+    release: crazy-kiwi
+  name: crazy-kiwi-nginx-ingress-controller
   namespace: ingress-basic
   resourceVersion: "27434"
-  selfLink: /apis/extensions/v1beta1/namespaces/ingress-basic/deployments/broken-grasshopper-nginx-ingress-controller
+  selfLink: /apis/extensions/v1beta1/namespaces/ingress-basic/deployments/crazy-kiwi-nginx-ingress-controller
   uid: f6c79505-bcfb-11e9-8603-2eb4fa0e67c5
 spec:
   progressDeadlineSeconds: 2147483647
@@ -24,7 +24,7 @@ spec:
     matchLabels:
       app: nginx-ingress
       component: controller
-      release: broken-grasshopper
+      release: crazy-kiwi
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -36,7 +36,7 @@ spec:
       labels:
         app: nginx-ingress
         component: controller
-        release: broken-grasshopper
+        release: crazy-kiwi
     spec:
       containers:
       - args:
@@ -44,7 +44,7 @@ spec:
         - --default-backend-service=blocbit/blocbit
         - --election-id=ingress-controller-leader
         - --ingress-class=nginx
-        - --configmap=ingress-basic/broken-grasshopper-nginx-ingress-controller
+        - --configmap=ingress-basic/crazy-kiwi-nginx-ingress-controller
         env:
         - name: POD_NAME
           valueFrom:
@@ -103,8 +103,8 @@ spec:
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
-      serviceAccount: broken-grasshopper-nginx-ingress
-      serviceAccountName: broken-grasshopper-nginx-ingress
+      serviceAccount: crazy-kiwi-nginx-ingress
+      serviceAccountName: crazy-kiwi-nginx-ingress
       terminationGracePeriodSeconds: 60
 status:
   availableReplicas: 2
