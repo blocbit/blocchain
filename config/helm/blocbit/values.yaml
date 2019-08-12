@@ -17,7 +17,7 @@ imagePullSecrets: []
 service:
   port: 80
   tport: 8105
-  pip: 40.121.183.52
+  pip: 13.92.191.59
 
 ingress:
   enabled: true
