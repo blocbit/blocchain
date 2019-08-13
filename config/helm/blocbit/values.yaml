@@ -26,7 +26,7 @@ ingress:
     kubernetes.io/ingress.class: nginx
     certmanager.k8s.io/cluster-issuer: letsencrypt-staging
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-  path: /
+  path: /(.*)
   hostname: blocbit.eastus.cloudapp.azure.com
   tls:
   - hosts: 
