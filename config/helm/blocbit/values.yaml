@@ -29,7 +29,8 @@ ingress:
   path: /
   hostname: blocbit.eastus.cloudapp.azure.com
   tls:
-    hosts: blocbit.eastus.cloudapp.azure.com
+  - hosts: 
+    - blocbit.eastus.cloudapp.azure.com
     secretName: tls-secret
 
 secrets: {}
