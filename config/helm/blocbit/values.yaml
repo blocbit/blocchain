@@ -22,9 +22,15 @@ service:
 ingress:
   enabled: true
   annotations:
-    kubernetes.io/ingress.class: addon-http-application-routing
+    #kubernetes.io/ingress.class: addon-http-application-routing
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-staging
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
   path: /
   hostname: blocbit.eastus.cloudapp.azure.com
+  tls:
+    host:
+    secretName: tls-secret
 
 secrets: {}
   # Optionally specify a set of secret objects whose values
