@@ -348,7 +348,7 @@ defaultBackend:
 
   ## If false, controller.defaultBackendService must be provided
   ##
-  enabled: true
+  enabled: false
 
   name: default-backend
   image:
