@@ -31,6 +31,7 @@ ingress:
   tls:
   - hosts: 
     - blocbit.eastus.cloudapp.azure.com
+    - blocbit.org
     secretName: tls-secret
 
 secrets: {}
