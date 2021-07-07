@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for Blocbit
+name: nginx
+version: 0.0.1

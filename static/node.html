@@ -1,211 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<!-- Head -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Blocbit</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
-        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/yeti/bootstrap.css">
+    <link rel="shortcut icon" href="/static/favicon.ico">
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
-    <style>
-        body {
-            background-image: url('http://127.0.0.1:43110/bloc.bit/img/login-bk.jpg');
-            height: 100%; 
-            width: 100%; 
-            background-repeat: no-repeat; 
-            background-attachment: fixed; 
-            background-position: center; 
-            background-size: cover;
-            font-family: Roboto; 
-            text-align: center;
-        }
-
-        .container {
-            max-width: 90%;
-            margin-top: 5%;
-        }
-
-        h2 {
-        font-size: initial; 
-        color: white;
-        }
-
-        a { text-decoration: none; color: goldenrod }
-        a:hover { color:gold }
-        a.nolink { border-bottom: none }
-        a.nolink:hover { border-bottom: none }
-        a.nolink:active { border-bottom: none }
-        a:link{text-decoration: none !important;}
-
-        .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
-            color: #fff;
-            background-color: #d39e00;
-        }
-
-        .topmenu { font-size: 14px;
-            margin-right: -10px;
-            background-color: black;
-            padding: 5px;
-            margin-left: -10px;
-            margin-top: -10px;
-            color: #666;
-            text-align: center;
-            min-height: 60px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.64);}
-        .topmenu a { color: #333 }
-        .topmenu.highlight { background-color: #fffede }
-
-        /* Head */
-        .head { 
-            left: 0;
-            position: fixed;
-            z-index: 3;
-            background-color: black;
-            }
-        .head .logo {
-            padding-left: 5px;
-        }
-
-        /*bitcoin wallet counter*/
-        .totbtc{color:white; padding-bottom:5px;}
-
-        .sat{margin-right: auto; margin-left: auto; width:153px; color:gold; border-bottom: #797777 1px solid; padding-left: 10px;}
-
-        #btc{float:left; color:goldenrod;}
-
-        /*clock counter*/        
-        #clockdiv{
-            position: absolute;
-            width: 100px;
-            margin-left: 30px;
-            z-index: 2;
-            cursor: help;
-            padding-top: 5px;
-        }
-
-        #clockdiv > div{
-            color:goldenrod;
-            display: inline-block;
-        }
-
-        /*menu tabs*/
-
-        #navbut{
-            background-image: linear-gradient(black, transparent);
-            width: 90px;
-            height: 22px;
-            position: absolute;
-            left: 20%;
-            top:55px;
-            text-align: center;
-            color: white;
-            border-radius: 0px 0px 10px 10px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,1);
-        }
-        #navbut :hover{
-            color:gold;
-        }
-
-        #navblc{
-            background-image: linear-gradient(black, transparent);
-            width: 90px;
-            height: 22px;
-            position: absolute;
-            right: 20%;
-            top:55px;
-            text-align: center;
-            color: white;
-            border-radius: 0px 0px 10px 10px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,1);
-        }
-        #navblc :hover{
-            color:gold;
-        }
-
-        .lds-ring {
-            display: inline-block;
-            position: relative;
-            width: 64px;
-            height: 64px;
-        }
-
-        .lds-ring div {
-            box-sizing: border-box;
-            display: block;
-            position: absolute;
-            width: 51px;
-            height: 51px;
-            margin: 6px;
-            border: 6px solid #fa923f;
-            border-radius: 50%;
-            animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-            border-color: #fa923f transparent transparent transparent;
-        }
-
-        .lds-ring div:nth-child(1) {
-            animation-delay: -0.45s;
-        }
-
-        .lds-ring div:nth-child(2) {
-            animation-delay: -0.3s;
-        }
-
-        .lds-ring div:nth-child(3) {
-            animation-delay: -0.15s;
-        }
-
-        @keyframes lds-ring {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
 </head>
-
+<!-- Head -->
 <body>
-    <!-- Head -->
-<div class="topmenu" style="margin-top:0;">
-    <div class="head">
-        <a class="logo nolink" href="?Home"><img src="http://127.0.0.1:43110/bloc.bit/img/logo.png" alt="Home"/></a>
-    </div>
-    <div class="sat" style="margin-top:0;">
-        <a href="https://www.blockchain.com/btc/address/1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa">
-        <div class="totbtc"><div id="btc"></div> Satoshi </div>
-        </a>
-        <div id="clockdiv">
-            <div><span class="days"></span></div>	
-            <div  style="color:white;padding-left: 20px;">Days</div>
-            <div style="visibility:hidden;position:absolute;">
-                <span class="hours"></span>
-                <span  class="minutes"></span>
-                <span class="seconds"></span>
+    <!-- NavBar-->
+    <nav class="navbar navbar-inverse navbar-default">
+            <div class="container-fluid">
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">
+                  <span class="glyphicon glyphicon-barcode" aria-hidden="true"></span>
+                  Blocbit
+                </a>
+              </div>
+          
+              <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                  <li>
+                    <a href="/">
+                        <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/network"><span class="glyphicon glyphicon-signal" aria-hidden="true"></span></a>
+                  </li>
+                </ul>
+              </div>
             </div>
-        </div>
-    </div>
-</div>
-       <div id="navbut"><a href="http://127.0.0.1:43110/gen.bloc.bit" class="navactive">Generation</a></div>
-       <div id="navblc"><a href="http://127.0.0.1:43110/bloc.bit" class="navactive">Home</a></div>
+          </nav>
+<!-- NavBar-->
+<!-- Body-->
     <div id="app">
         <div class="container">
-            <div class="row">
-                <div class="col">
-                    <ul class="nav nav-pills">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/">Ballot &amp; Node</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/network">Network</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <hr>
             <div v-if="error" class="alert alert-danger" role="alert" style="word-wrap: break-word;">
                 {{ error }}
             </div>
@@ -338,11 +181,17 @@
             </div>
         </div>
     </div>
-
+<!-- Body-->
+<!-- Footer-->
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="http://127.0.0.1:43110/bloc.bit/js/countdown.js"></script>
-    <script src="http://127.0.0.1:43110/bloc.bit/js/bitcoin.js"></script>
+<script
+  src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+  integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+  crossorigin="anonymous"></script>
+<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+<script src="https://npmcdn.com/imagesloaded@4.1/imagesloaded.pkgd.min.js"></script>
+<script src="/static/js/main.js"></script>
     <script>
         var strMessage1 = document.getElementById("amount") ;
         strMessage1.innerHTML = strMessage1.innerHTML.replace( "1","✓") ;
@@ -500,6 +349,6 @@
             }
         })
     </script>
+    <!-- Footer-->
 </body>
-
 </html>

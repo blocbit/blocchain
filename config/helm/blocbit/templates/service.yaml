@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "blocbit.fullname" . }}
+  labels:
+    app: {{ template "blocbit.name" . }}
+    chart: {{ template "blocbit.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  {{- if .Values.ingress.enabled }}
+  type: ClusterIP
+  {{- else }}
+  loadBalancerIP: {{ .Values.service.pip }}
+  type: LoadBalancer
+  {{- end }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.tport }}
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "blocbit.name" . }}
+    release: {{ .Release.Name }}
